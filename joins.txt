@@ -1,0 +1,154 @@
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| akanksha           |
+| collage            |
+| information_schema |
+| mysql              |
+| performance_schema |
+| student            |
+| studentdb          |
+| sys                |
+| users              |
++--------------------+
+9 rows in set (0.333 sec)
+
+mysql> use collage;
+Database changed
+mysql> show tables;
++-------------------+
+| Tables_in_collage |
++-------------------+
+| course            |
+| department        |
+| student           |
++-------------------+
+3 rows in set (0.046 sec)
+
+mysql> select * from course;
++-----------+---------------------+---------------+
+| course_id | course_name         | department_id |
++-----------+---------------------+---------------+
+|       201 | Java Programming    |             1 |
+|       202 | Database Management |             1 |
+|       203 | Thermodynamics      |             2 |
+|       204 | Civil Engineering   |             3 |
++-----------+---------------------+---------------+
+4 rows in set (0.113 sec)
+
+mysql> select * from department;
++---------------+------------------------+
+| department_id | department_name        |
++---------------+------------------------+
+|             1 | Computer Engineering   |
+|             2 | Mechanical Engineering |
+|             3 | Civil Engineering      |
++---------------+------------------------+
+3 rows in set (0.055 sec)
+
+mysql> select * from student;
++------------+--------------+------+---------------+
+| student_id | student_name | cgpa | department_id |
++------------+--------------+------+---------------+
+|        101 | Jagrav       | 8.94 |             1 |
+|        102 | Akansha      | 7.89 |             1 |
+|        103 | Rahul        | 7.10 |             3 |
+|        104 | Priya        | 6.90 |             3 |
++------------+--------------+------+---------------+
+4 rows in set (0.031 sec)
+
+mysql> SELECT
+    ->     c.course_id,
+    ->     c.course_name,
+    ->     d.department_id,
+    ->     d.department_name
+    -> FROM course c
+    -> JOIN department d
+    -> ON c.department_id = d.department_id;
++-----------+---------------------+---------------+------------------------+
+| course_id | course_name         | department_id | department_name        |
++-----------+---------------------+---------------+------------------------+
+|       201 | Java Programming    |             1 | Computer Engineering   |
+|       202 | Database Management |             1 | Computer Engineering   |
+|       203 | Thermodynamics      |             2 | Mechanical Engineering |
+|       204 | Civil Engineering   |             3 | Civil Engineering      |
++-----------+---------------------+---------------+------------------------+
+4 rows in set (0.019 sec)
+
+mysql>  select c.course_name, COUNT(e.student_id) as department_id
+    -> from course c
+    -> LEFT JOIN student_id on c.course_id=e.course_id
+    -> GROUP BY c,course_id.c.course_name;
+ERROR 1146 (42S02): Table 'collage.student_id' doesn't exist
+mysql> SELECT
+    ->     s.student_id,
+    ->     s.student_name,
+    ->     d.department_name
+    -> FROM student s
+    -> JOIN department d
+    -> ON s.department_id = d.department_id;
++------------+--------------+----------------------+
+| student_id | student_name | department_name      |
++------------+--------------+----------------------+
+|        101 | Jagrav       | Computer Engineering |
+|        102 | Akansha      | Computer Engineering |
+|        103 | Rahul        | Civil Engineering    |
+|        104 | Priya        | Civil Engineering    |
++------------+--------------+----------------------+
+4 rows in set (0.008 sec)
+
+mysql> SELECT
+    ->     c.course_name,
+    ->     COUNT(e.student_id) AS total_students
+    -> FROM course c
+    -> LEFT JOIN enrollment e
+    ->     ON c.course_id = e.course_id
+    -> GROUP BY c.course_id, c.course_name;
+ERROR 1146 (42S02): Table 'collage.enrollment' doesn't exist
+mysql> CREATE TABLE enrollment (
+    ->     student_id INT,
+    ->     course_id INT,
+    ->     enrollment_date DATE,
+    ->     PRIMARY KEY (student_id, course_id),
+    ->     FOREIGN KEY (student_id) REFERENCES student(student_id),
+    ->     FOREIGN KEY (course_id) REFERENCES course(course_id)
+    -> );
+Query OK, 0 rows affected (0.753 sec)
+
+mysql> INSERT INTO enrollment (student_id, course_id, enrollment_date)
+    -> VALUES
+    -> (101, 201, '2026-06-10'),
+    -> (101, 202, '2026-06-11'),
+    -> (102, 201, '2026-06-10'),
+    -> (103, 203, '2026-06-12'),
+    -> (104, 204, '2026-06-13');
+Query OK, 5 rows affected (0.462 sec)
+Records: 5  Duplicates: 0  Warnings: 0
+
+mysql> ELECT
+    ->     ->     c.course_name,
+    ->     ->     COUNT(e.student_id) AS total_students
+    ->     -> FROM course c
+    ->     -> LEFT JOIN enrollment e
+    ->     ->     ON c.course_id = e.course_id
+    ->     -> GROUP BY c.course_id, c.course_name;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'ELECT
+    ->     c.course_name,
+    ->     COUNT(e.student_id) AS total_students' at line 1
+mysql> SELECT c.course_name, COUNT(e.student_id) AS total_students
+    -> FROM course c
+    -> LEFT JOIN enrollment e
+    -> ON c.course_id = e.course_id
+    -> GROUP BY c.course_id, c.course_name;
++---------------------+----------------+
+| course_name         | total_students |
++---------------------+----------------+
+| Java Programming    |              2 |
+| Database Management |              1 |
+| Thermodynamics      |              1 |
+| Civil Engineering   |              1 |
++---------------------+----------------+
+4 rows in set (0.028 sec)
+
+mysql>
